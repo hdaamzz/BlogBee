@@ -2,17 +2,17 @@ import { Injectable } from '@angular/core';
 import { env } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { catchError, Observable, of, BehaviorSubject, tap } from 'rxjs';
-import { ILogin, IRegister } from '../../interfaces/auth.interface';
+import { RegisterResponse, ErrorResponse, ILogin, IRegister, User, LoginResponse } from '../../interfaces/auth.interface';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
   private apiUrl = `${env.apiUrl}/auth`;
-  
-  private currentUserSubject = new BehaviorSubject<any>(this.getStoredUser());
+
+  private currentUserSubject = new BehaviorSubject<User | null>(this.getStoredUser());
   public currentUser$ = this.currentUserSubject.asObservable();
-  
+
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(this.getStoredAuthStatus());
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
@@ -22,7 +22,7 @@ export class AuthService {
     }
   }
 
-  private getStoredUser(): any {
+  private getStoredUser(): User | null {
     if (typeof window !== 'undefined' && localStorage) {
       const userData = localStorage.getItem('currentUser');
       return userData ? JSON.parse(userData) : null;
@@ -37,7 +37,7 @@ export class AuthService {
     return false;
   }
 
-  private storeUser(user: any): void {
+  private storeUser(user: User): void {
     if (typeof window !== 'undefined' && localStorage) {
       localStorage.setItem('currentUser', JSON.stringify(user));
       localStorage.setItem('isAuthenticated', 'true');
@@ -51,51 +51,65 @@ export class AuthService {
     }
   }
 
-  userRegister(userData: IRegister): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/register`, userData).pipe(
+  userRegister(userData: IRegister): Observable<RegisterResponse | ErrorResponse> {
+    return this.http.post<RegisterResponse>(`${this.apiUrl}/register`, userData).pipe(
       catchError((error) => {
-        return of({ success: false, message: error.error.message || 'Registration failed. Please try again.' });
+        const fallback: ErrorResponse = {
+          success: false,
+          message: error.error?.message || 'Registration failed. Please try again.'
+        };
+        return of(fallback);
       })
     );
   }
 
-  userLogin(userData: ILogin): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/login`, userData, { withCredentials: true }).pipe(
+  userLogin(userData: ILogin): Observable<LoginResponse | ErrorResponse> {
+    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, userData, { withCredentials: true }).pipe(
       tap((response) => {
         if (response.success && response.data) {
           this.setCurrentUser(response.data.user);
         }
       }),
       catchError((error) => {
-        return of({ success: false, message: error.error.message || 'Login failed. Please try again.' });
+        const fallback: ErrorResponse = {
+          success: false,
+          message: error.error?.message || 'Login failed. Please try again.'
+        };
+        return of(fallback);
       })
     );
   }
 
-  getProfile(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/profile`, {
+  getProfile(): Observable<LoginResponse | ErrorResponse> {
+    return this.http.get<LoginResponse>(`${this.apiUrl}/profile`, {
       withCredentials: true
     }).pipe(
       tap((response) => {
-        if (response.success && response.data) {
-          this.setCurrentUser(response.data);
+        if (response.success && response.data.user) {
+          this.setCurrentUser(response.data.user);
         }
       }),
       catchError((error) => {
-        this.clearCurrentUser();
-        return of({ success: false, message: error.error.message || 'Profile fetching failed. Please try again.' });
+        const fallback: ErrorResponse = {
+          success: false,
+          message: error.error?.message || 'Profile fetching failed. Please try again.'
+        };
+        return of(fallback);
       })
     );
   }
 
-  logout(): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/logout`, {}, { withCredentials: true }).pipe(
+  logout(): Observable<LoginResponse | ErrorResponse> {
+    return this.http.post<LoginResponse>(`${this.apiUrl}/logout`, {}, { withCredentials: true }).pipe(
       tap(() => {
         this.clearCurrentUser();
       }),
       catchError((error) => {
-        this.clearCurrentUser();
-        return of({ success: false, message: error.error.message || 'Logout failed.' });
+        const fallback: ErrorResponse = {
+          success: false,
+          message: error.error?.message || 'Logout Failed. '
+        };
+        return of(fallback);
       })
     );
   }
@@ -104,7 +118,7 @@ export class AuthService {
     this.getProfile().subscribe({
       next: (response) => {
         if (response.success) {
-          this.setCurrentUser(response.data);
+          this.setCurrentUser(response.data.user);
         } else {
           this.clearCurrentUser();
         }
@@ -115,7 +129,7 @@ export class AuthService {
     });
   }
 
-  setCurrentUser(user: any): void {
+  setCurrentUser(user: User): void {
     this.currentUserSubject.next(user);
     this.isAuthenticatedSubject.next(true);
     this.storeUser(user);
@@ -127,7 +141,7 @@ export class AuthService {
     this.clearStoredData();
   }
 
-  getCurrentUser(): any {
+  getCurrentUser(): User | null {
     return this.currentUserSubject.value;
   }
 

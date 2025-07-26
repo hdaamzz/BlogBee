@@ -1,87 +1,98 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { NavComponent } from "../../../shared/nav/nav.component";
+import { finalize } from 'rxjs/operators';
+
+import { NavComponent } from '../../../shared/nav/nav.component';
 import { emailValidator, passwordValidator, spacesValidator } from '../../../validators/form-validators';
 import { AuthService } from '../../../core/services/auth/auth.service';
 import { ToastrService } from 'ngx-toastr';
-
+import { LoginFormData } from '../../../core/interfaces/auth.interface';
 
 @Component({
   selector: 'app-login',
+  standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule, NavComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   loginForm!: FormGroup;
   showPassword = false;
   isLoading = false;
 
-  constructor(
-    private _fb: FormBuilder,
-    private readonly _router: Router,
-    private _authService: AuthService,
-    private toastr:ToastrService
-  ) {
-    this._initializeForms();
+  private readonly formBuilder = inject(FormBuilder);
+  private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
+  private readonly toastr = inject(ToastrService);
+
+  ngOnInit(): void {
+    this.initializeForm();
   }
 
-  private _initializeForms(): void {
-    this.loginForm = this._fb.group({
-      email: [
-        '',
-        [
-          Validators.required,
-          spacesValidator(),
-          emailValidator(),
-        ],
-      ],
-      password: [
-        '',
-        [
-          Validators.required,
-          passwordValidator()
-        ]
-      ]
+  private initializeForm(): void {
+    this.loginForm = this.formBuilder.group({
+      email: ['', [
+        Validators.required,
+        spacesValidator(),
+        emailValidator()
+      ]],
+      password: ['', [
+        Validators.required,
+        passwordValidator()
+      ]]
     });
   }
 
-  hasError(controlName: string, errorName: string): boolean {
-    return this.loginForm.controls[controlName].hasError(errorName);
+  hasError(controlName: keyof LoginFormData, errorName: string): boolean {
+    const control = this.loginForm.get(controlName);
+    return !!(control?.hasError(errorName) && (control.dirty || control.touched));
   }
 
-  togglePasswordVisibility() {
+  togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;
   }
 
-    onLogin() {
-    if (!this.loginForm.valid) {
-      this.loginForm.markAllAsTouched();
+  onLogin(): void {
+    if (this.loginForm.invalid) {
+      this.markFormGroupTouched();
       return;
     }
 
-    this.isLoading = true;
-    this._authService.userLogin(this.loginForm.value).subscribe({
-      next: (res) => {
-        if (res.success) {
-          this.toastr.success('Welcome back!', 'Login Successful');
-          this._router.navigate(['/']); 
-        } else {
-          this.toastr.error(res.message || 'Invalid credentials', 'Login Failed');
-        }
-        this.isLoading = false;
-      },
-      error: () => {
-        this.toastr.error('Something went wrong. Please try again.', 'Error');
-        this.isLoading = false;
-      }
-    });
+    this.performLogin();
   }
 
+  private markFormGroupTouched(): void {
+    this.loginForm.markAllAsTouched();
+  }
 
-  switchToRegister() {
-    this._router.navigate(['register'])
+  private performLogin(): void {
+    this.isLoading = true;
+    const formData: LoginFormData = this.loginForm.value;
+
+    this.authService.userLogin(formData)
+      .pipe(finalize(() => this.isLoading = false))
+      .subscribe({
+        next: (response) => this.handleLoginSuccess(response),
+        error: () => this.handleLoginError()
+      });
+  }
+
+  private handleLoginSuccess(response: any): void {
+    if (response.success) {
+      this.toastr.success('Welcome back!', 'Login Successful');
+      this.router.navigate(['/']);
+    } else {
+      this.toastr.error(response.message || 'Invalid credentials', 'Login Failed');
+    }
+  }
+
+  private handleLoginError(): void {
+    this.toastr.error('Something went wrong. Please try again.', 'Error');
+  }
+
+  switchToRegister(): void {
+    this.router.navigate(['/register']);
   }
 }

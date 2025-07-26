@@ -1,12 +1,22 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { alphabetsValidator, emailValidator, passwordMatchValidator, passwordValidator, repeateCharacterValidator, spacesValidator } from '../../../validators/form-validators';
 import { Router } from '@angular/router';
+import { finalize } from 'rxjs/operators';
+
 import { NavComponent } from '../../../shared/nav/nav.component';
+import { 
+  alphabetsValidator, 
+  emailValidator, 
+  passwordMatchValidator, 
+  passwordValidator, 
+  repeateCharacterValidator, 
+  spacesValidator 
+} from '../../../validators/form-validators';
 import { AuthService } from '../../../core/services/auth/auth.service';
-import { IRegister } from '../../../core/interfaces/auth.interface';
+import { IRegister, RegisterFormData } from '../../../core/interfaces/auth.interface';
 import { ToastrService } from 'ngx-toastr';
+
 
 
 @Component({
@@ -16,94 +26,108 @@ import { ToastrService } from 'ngx-toastr';
   templateUrl: './register.component.html',
   styleUrl: './register.component.css'
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnInit {
   registerForm!: FormGroup;
   showPassword = false;
   isLoading = false;
 
-  constructor(private _fb: FormBuilder,
-      private readonly _router: Router,
-      private authService: AuthService,
-      private toastr: ToastrService,
-    ) {
-    this._initializeForms()
+  private readonly formBuilder = inject(FormBuilder);
+  private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
+  private readonly toastr = inject(ToastrService);
+
+  ngOnInit(): void {
+    this.initializeForm();
   }
 
-  private _initializeForms(): void {
-    this.registerForm = this._fb.group({
-      name: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(3),
-          alphabetsValidator(),
-          spacesValidator(),
-          repeateCharacterValidator(),
-        ],
-      ],
-      email: [
-        '',
-        [
-          Validators.required,
-          spacesValidator(),
-          emailValidator(),
-        ],
-      ],
-      password: [
-        '',
-        [
-          Validators.required,
-          passwordValidator(),
-        ],
-      ],
-      confirmPassword: [
-        '',
-        [
-          Validators.required,
-          spacesValidator(),
-        ],
-      ],
+  private initializeForm(): void {
+    this.registerForm = this.formBuilder.group({
+      name: ['', [
+        Validators.required,
+        Validators.minLength(3),
+        alphabetsValidator(),
+        spacesValidator(),
+        repeateCharacterValidator()
+      ]],
+      email: ['', [
+        Validators.required,
+        spacesValidator(),
+        emailValidator()
+      ]],
+      password: ['', [
+        Validators.required,
+        passwordValidator()
+      ]],
+      confirmPassword: ['', [
+        Validators.required,
+        spacesValidator()
+      ]]
     }, { validators: passwordMatchValidator });
   }
 
-  togglePasswordVisibility() {
+  hasError(controlName: keyof RegisterFormData, errorName: string): boolean {
+    const control = this.registerForm.get(controlName);
+    return !!(control?.hasError(errorName) && (control.dirty || control.touched));
+  }
+
+  hasFormError(errorName: string): boolean {
+    const confirmPasswordControl = this.registerForm.get('confirmPassword');
+    return !!(this.registerForm.hasError(errorName) && 
+             (confirmPasswordControl?.dirty || confirmPasswordControl?.touched));
+  }
+
+  togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;
   }
 
-  onRegister() {
-    if (!this.registerForm.valid) {
-      this.registerForm.markAllAsTouched();
+  onRegister(): void {
+    if (this.registerForm.invalid) {
+      this.markFormGroupTouched();
       return;
     }
+
+    this.performRegistration();
+  }
+
+  private markFormGroupTouched(): void {
+    this.registerForm.markAllAsTouched();
+  }
+
+  private performRegistration(): void {
     this.isLoading = true;
-    const userData:IRegister ={
-      name:this.registerForm.value.name,
-      email:this.registerForm.value.email,
-      password:this.registerForm.value.password
+    const userData = this.buildUserData();
+
+    this.authService.userRegister(userData)
+      .pipe(finalize(() => this.isLoading = false))
+      .subscribe({
+        next: (response) => this.handleRegistrationSuccess(response),
+        error: () => this.handleRegistrationError()
+      });
+  }
+
+  private buildUserData(): IRegister {
+    const formValue: RegisterFormData = this.registerForm.value;
+    return {
+      name: formValue.name,
+      email: formValue.email,
+      password: formValue.password
+    };
+  }
+
+  private handleRegistrationSuccess(response: any): void {
+    if (response.success) {
+      this.toastr.success('Account created successfully');
+      this.router.navigate(['/login']);
+    } else {
+      this.toastr.error(response.message || 'Registration Failed');
     }
-    
-    this.authService.userRegister(userData).subscribe({
-      next: (res) => {
-        if (res.success) {
-          this.toastr.success("Account created successfully")
-          this._router.navigate(['login']);
-        } else {
-          this.toastr.error(res.message || 'Registration Failed');
-        }
-        this.isLoading = false;
-      },
-      error: (error) => {
-        this.toastr.error('Something went wrong. Please try again.', 'Error');
-        this.isLoading = false;
-      }
-    });
   }
 
-  hasError(controlName: string, errorName: string): boolean {
-    return this.registerForm.controls[controlName].hasError(errorName);
+  private handleRegistrationError(): void {
+    this.toastr.error('Something went wrong. Please try again.', 'Error');
   }
 
-  switchToLogin() {
-    this._router.navigate(['login'])
+  switchToLogin(): void {
+    this.router.navigate(['/login']);
   }
 }

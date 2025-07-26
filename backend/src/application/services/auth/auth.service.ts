@@ -5,7 +5,7 @@ import { IAuthService } from '../../../domain/services/IAuth.service';
 import { RegisterUserResult } from '../../../domain/user-cases/auth/IRegister-user.usecase';
 import { LoginUserUseCase } from '../../use-cases/auth/login-user.usecase';
 import { LogoutUserUseCase } from '../../use-cases/auth/logout-user.usecase';
-import { LoginUserResult } from '../../../domain/user-cases/auth/Ilogin-user.usecase';
+import { LoginUserResult } from '../../../domain/user-cases/auth/ILogin-user.usecase';
 import { LogoutUserResult } from '../../../domain/user-cases/auth/ILogout-user.usecase';
 
 @injectable()

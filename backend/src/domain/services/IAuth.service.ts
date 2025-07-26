@@ -1,5 +1,5 @@
 import { LoginUserDTO, RegisterUserDTO } from "../../application/dtos/auth.dto";
-import { LoginUserResult } from "../user-cases/auth/Ilogin-user.usecase";
+import { LoginUserResult } from "../user-cases/auth/ILogin-user.usecase";
 import { LogoutUserResult } from "../user-cases/auth/ILogout-user.usecase";
 import { RegisterUserResult } from "../user-cases/auth/IRegister-user.usecase";
 
