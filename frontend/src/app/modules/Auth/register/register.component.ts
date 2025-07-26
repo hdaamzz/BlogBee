@@ -5,12 +5,14 @@ import { alphabetsValidator, emailValidator, passwordMatchValidator, passwordVal
 import { Router } from '@angular/router';
 import { NavComponent } from '../../../shared/nav/nav.component';
 import { AuthService } from '../../../core/services/auth/auth.service';
+import { IRegister } from '../../../core/interfaces/auth.interface';
+import { ToastrService } from 'ngx-toastr';
 
 
 @Component({
   selector: 'app-register',
-  standalone:true,
-  imports: [CommonModule,FormsModule,ReactiveFormsModule,NavComponent],
+  standalone: true,
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, NavComponent],
   templateUrl: './register.component.html',
   styleUrl: './register.component.css'
 })
@@ -19,27 +21,21 @@ export class RegisterComponent {
   showPassword = false;
   isLoading = false;
 
-  constructor(private _fb: FormBuilder,private readonly _router: Router) {
-   this._initializeForms()
+  constructor(private _fb: FormBuilder,
+      private readonly _router: Router,
+      private authService: AuthService,
+      private toastr: ToastrService,
+    ) {
+    this._initializeForms()
   }
 
   private _initializeForms(): void {
     this.registerForm = this._fb.group({
-      firstName: [
+      name: [
         '',
         [
           Validators.required,
           Validators.minLength(3),
-          alphabetsValidator(),
-          spacesValidator(),
-          repeateCharacterValidator(),
-        ],
-      ],
-      lastName: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(1),
           alphabetsValidator(),
           spacesValidator(),
           repeateCharacterValidator(),
@@ -73,47 +69,34 @@ export class RegisterComponent {
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword;
   }
-  // createAccount(): void {
-  //   if (!this.registerForm.valid) {
-  //     this.registerForm.markAllAsTouched();
-  //     return;
-  //   }
-  
-  //   this.loading = true;
-  //   const formData = this.registerForm.value;
-  
-  //   this._authService.userRegister(formData)
-  //     .pipe(takeUntil(this._destroy$))
-  //     .subscribe({
-  //       next: (response) => {
-  //         this.loading = false;
-  //         if (response.success) {
-  //           Notiflix.Notify.success('OTP sent successfully to your email');
-  //           this.showOtpForm = true;
-  //           this._startResendOtpTimer();
-  //         } else {
-  //           Notiflix.Notify.failure(response.message || 'Failed to send otp');
-  //         }
-  //       },
-  //       error: (error) => {
-  //         this.loading = false;
-  //         Notiflix.Notify.failure(error.error.message || 'Something went wrong');
-  //       }
-  //     });
-  // }
 
   onRegister() {
     if (!this.registerForm.valid) {
       this.registerForm.markAllAsTouched();
       return;
     }
-    if (this.registerForm.valid) {
-      this.isLoading = true;
-      setTimeout(() => {
-        this.isLoading = false;
-        console.log('Register attempt:', this.registerForm.value);
-      }, 2000);
+    this.isLoading = true;
+    const userData:IRegister ={
+      name:this.registerForm.value.name,
+      email:this.registerForm.value.email,
+      password:this.registerForm.value.password
     }
+    
+    this.authService.userRegister(userData).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.toastr.success("Account created successfully")
+          this._router.navigate(['login']);
+        } else {
+          this.toastr.error(res.message || 'Registration Failed');
+        }
+        this.isLoading = false;
+      },
+      error: (error) => {
+        this.toastr.error('Something went wrong. Please try again.', 'Error');
+        this.isLoading = false;
+      }
+    });
   }
 
   hasError(controlName: string, errorName: string): boolean {

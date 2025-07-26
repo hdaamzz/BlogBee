@@ -4,6 +4,8 @@ import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } 
 import { Router } from '@angular/router';
 import { NavComponent } from "../../../shared/nav/nav.component";
 import { emailValidator, passwordValidator, spacesValidator } from '../../../validators/form-validators';
+import { AuthService } from '../../../core/services/auth/auth.service';
+import { ToastrService } from 'ngx-toastr';
 
 
 @Component({
@@ -11,7 +13,7 @@ import { emailValidator, passwordValidator, spacesValidator } from '../../../val
   imports: [CommonModule, FormsModule, ReactiveFormsModule, NavComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
-})  
+})
 export class LoginComponent {
   loginForm!: FormGroup;
   showPassword = false;
@@ -19,7 +21,10 @@ export class LoginComponent {
 
   constructor(
     private _fb: FormBuilder,
-    private readonly _router: Router) {
+    private readonly _router: Router,
+    private _authService: AuthService,
+    private toastr:ToastrService
+  ) {
     this._initializeForms();
   }
 
@@ -51,19 +56,30 @@ export class LoginComponent {
     this.showPassword = !this.showPassword;
   }
 
-  onLogin() {
+    onLogin() {
     if (!this.loginForm.valid) {
       this.loginForm.markAllAsTouched();
       return;
     }
-    if (this.loginForm.valid) {
-      this.isLoading = true;
-      setTimeout(() => {
+
+    this.isLoading = true;
+    this._authService.userLogin(this.loginForm.value).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.toastr.success('Welcome back!', 'Login Successful');
+          this._router.navigate(['/']); 
+        } else {
+          this.toastr.error(res.message || 'Invalid credentials', 'Login Failed');
+        }
         this.isLoading = false;
-        console.log('Login attempt:', this.loginForm.value);
-      }, 2000);
-    }
+      },
+      error: () => {
+        this.toastr.error('Something went wrong. Please try again.', 'Error');
+        this.isLoading = false;
+      }
+    });
   }
+
 
   switchToRegister() {
     this._router.navigate(['register'])
