@@ -10,7 +10,6 @@ import { ILogin, IRegister } from '../../interfaces/auth.interface';
 export class AuthService {
   private apiUrl = `${env.apiUrl}/auth`;
   
-  // Initialize subjects with persisted data
   private currentUserSubject = new BehaviorSubject<any>(this.getStoredUser());
   public currentUser$ = this.currentUserSubject.asObservable();
   
@@ -18,13 +17,11 @@ export class AuthService {
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
   constructor(private http: HttpClient) {
-    // Verify stored authentication status on service initialization
     if (this.getStoredAuthStatus() && !this.getStoredUser()) {
       this.checkAuthStatus();
     }
   }
 
-  // localStorage helper methods
   private getStoredUser(): any {
     if (typeof window !== 'undefined' && localStorage) {
       const userData = localStorage.getItem('currentUser');
