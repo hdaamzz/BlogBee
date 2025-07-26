@@ -2,7 +2,8 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
-import router from "./routes/indexRouter"; 
+import router from "../main/routes/index.routes";
+import "./container/container";
 
 const app = express();
 
@@ -19,7 +20,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-app.use('/api',router)
-
+app.use('/api', router);
 
 export default app;
