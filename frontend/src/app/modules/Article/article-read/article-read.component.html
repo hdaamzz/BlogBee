@@ -1,0 +1,141 @@
+<!-- Loading State -->
+<div *ngIf="loading()" class="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center px-4">
+  <div class="text-center space-y-4">
+    <div class="animate-spin rounded-full h-8 w-8 sm:h-12 sm:w-12 border-4 border-amber-500 border-t-transparent mx-auto"></div>
+    <p class="text-amber-400 text-base sm:text-lg">Loading article...</p>
+  </div>
+</div>
+
+<!-- Error State -->
+<div *ngIf="error() && !loading()" class="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center p-4">
+  <div class="text-center space-y-6 max-w-sm sm:max-w-md mx-auto">
+    <div class="w-16 h-16 sm:w-20 sm:h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto">
+      <svg class="w-8 h-8 sm:w-10 sm:h-10 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+      </svg>
+    </div>
+    <div>
+      <h2 class="text-xl sm:text-2xl font-bold text-amber-400 mb-2">Article Not Found</h2>
+      <p class="text-amber-300/70 text-sm sm:text-base">{{ error() }}</p>
+    </div>
+    <button 
+      (click)="goBack()"
+      class="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-400 text-black font-semibold rounded-xl hover:from-amber-400 hover:to-amber-300 transition-all duration-300 text-sm sm:text-base"
+    >
+      Go Back
+    </button>
+  </div>
+</div>
+
+<!-- Article Content -->
+<div *ngIf="article() && !loading() && !error()" class="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black">
+  
+  <!-- Navigation Bar -->
+  <nav class="sticky top-0 z-50 bg-black/90 backdrop-blur-xl border-b border-amber-400/20">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+      <button 
+        (click)="goBack()"
+        class="flex items-center space-x-2 text-amber-400 hover:text-amber-300 transition-colors duration-200 touch-manipulation"
+      >
+        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+        <span class="font-medium text-sm sm:text-base">Back</span>
+      </button>
+      
+      <!-- Mobile menu button for additional actions -->
+      <button 
+        (click)="shareArticle()"
+        class="sm:hidden flex items-center justify-center w-8 h-8 rounded-full bg-amber-500/10 text-amber-400 touch-manipulation"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"/>
+        </svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Article Header -->
+  <header class="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 lg:py-12">
+    <div class="space-y-4 sm:space-y-6">
+      
+      <!-- Author Info -->
+      <div class="flex items-center space-x-3 sm:space-x-4" *ngIf="article()!.author">
+        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-amber-400 to-amber-500 rounded-full flex items-center justify-center flex-shrink-0">
+          <span class="text-black font-bold text-sm sm:text-lg">
+            {{ article()!.author!.username.charAt(0).toUpperCase() }}
+          </span>
+        </div>
+        <div class="min-w-0 flex-1">
+          <p class="text-amber-300 font-semibold text-sm sm:text-base truncate">{{ article()!.author!.username }}</p>
+          <p class="text-amber-400/60 text-xs sm:text-sm truncate">{{ article()!.author!.email }}</p>
+        </div>
+      </div>
+
+      <!-- Article Title -->
+      <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white leading-tight sm:leading-tight break-words">
+        {{ article()!.title }}
+      </h1>
+
+      <!-- Article Excerpt -->
+      <p class="text-base sm:text-lg md:text-xl lg:text-2xl text-white/80 leading-relaxed max-w-3xl">
+        {{ article()!.excerpt }}
+      </p>
+
+      <!-- Tags -->
+      <div class="flex flex-wrap gap-2 sm:gap-3" *ngIf="article()!.tags && article()!.tags.length > 0">
+        <span 
+          *ngFor="let tag of article()!.tags" 
+          class="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 bg-amber-500/10 text-amber-400 text-xs sm:text-sm rounded-full border border-amber-500/20 hover:bg-amber-500/20 transition-colors duration-200 break-all"
+        >
+          #{{ tag }}
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Article Content -->
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 pb-8 sm:pb-12 lg:pb-16">
+    <article class="prose prose-sm sm:prose-base lg:prose-lg prose-amber max-w-none">
+      <div 
+        class="article-content text-amber-100 leading-relaxed"
+        [innerHTML]="article()!.content">
+      </div>
+    </article>
+  </main>
+
+  <!-- Article Footer -->
+  <footer class="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 border-t border-amber-400/20">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-4 sm:space-y-0">
+      
+      <!-- Share Button -->
+      <div class="w-full sm:w-auto">
+        <button 
+          (click)="shareArticle()"
+          class="hidden sm:flex items-center space-x-2 px-4 py-2 bg-amber-500/10 text-amber-400 border border-amber-500/30 rounded-lg hover:bg-amber-500/20 hover:border-amber-400 transition-all duration-300 touch-manipulation"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"/>
+          </svg>
+          <span class="text-sm sm:text-base">Share Article</span>
+        </button>
+        
+        <!-- Mobile share button -->
+        <button 
+          (click)="shareArticle()"
+          class="sm:hidden w-full flex items-center justify-center space-x-2 px-4 py-3 bg-amber-500/10 text-amber-400 border border-amber-500/30 rounded-lg hover:bg-amber-500/20 hover:border-amber-400 transition-all duration-300 touch-manipulation"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"/>
+          </svg>
+          <span>Share Article</span>
+        </button>
+      </div>
+      
+      <!-- Publication Date -->
+      <div class="text-amber-400/60 text-xs sm:text-sm">
+        <p>Published {{ formatDate(article()!.createdAt) }}</p>
+      </div>
+    </div>
+  </footer>
+</div>

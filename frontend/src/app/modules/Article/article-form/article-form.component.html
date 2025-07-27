@@ -1,0 +1,194 @@
+<div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+  <div class="bg-gradient-to-br from-gray-900/95 to-slate-900/95 backdrop-blur-xl border border-amber-400/30 rounded-3xl w-full max-w-6xl max-h-[95vh] overflow-hidden shadow-2xl shadow-amber-500/20">
+
+    <!-- Header -->
+    <header class="flex items-center justify-between p-6 border-b border-amber-400/20 bg-gradient-to-r from-amber-400/10 via-transparent to-amber-400/5">
+      <div class="flex items-center space-x-4">
+        <div class="w-10 h-10 bg-gradient-to-r from-amber-400 to-amber-500 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/30">
+          <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+          </svg>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold bg-gradient-to-r from-amber-400 via-amber-300 to-amber-200 bg-clip-text text-transparent">
+            {{ isEditing ? 'Edit Article' : 'Create New Article' }}
+          </h2>
+          <p class="text-amber-300/60 text-sm mt-1">{{ isEditing ? 'Update your article content' : 'Share your thoughts with the world' }}</p>
+        </div>
+      </div>
+      <button
+        type="button"
+        (click)="onCancel()"
+        class="p-3 text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 rounded-xl transition-all duration-200 group hover:rotate-90"
+        aria-label="Close form"
+      >
+        <svg class="w-6 h-6 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </header>
+
+    <!-- Form Container -->
+    <div class="overflow-y-auto max-h-[calc(95vh-120px)] scrollbar-thin scrollbar-thumb-amber-500/30 scrollbar-track-transparent">
+      <form [formGroup]="articleForm" (ngSubmit)="onSubmit()" class="p-6 space-y-8">
+
+        <!-- Title -->
+        <div class="group">
+          <label for="title" class="flex items-center text-sm font-semibold text-amber-400 mb-3">
+            <div class="w-8 h-8 bg-amber-500/20 rounded-lg flex items-center justify-center mr-3">
+              <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+              </svg>
+            </div>
+            Article Title *
+          </label>
+          <input 
+            id="title" 
+            formControlName="title" 
+            type="text" 
+            placeholder="Enter an engaging title for your article..."
+            class="w-full px-6 py-4 bg-black/40 border-2 border-amber-500/20 rounded-2xl text-amber-100 placeholder-amber-300/40 focus:border-amber-400 focus:ring-4 focus:ring-amber-500/10 focus:outline-none transition-all duration-300 hover:border-amber-500/30 hover:shadow-lg hover:shadow-amber-500/10"
+          >
+          <div class="mt-3 min-h-[24px]">
+            <p *ngIf="hasError('title', 'required')" class="text-red-400 text-sm flex items-center animate-fade-in">
+              <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+              </svg>
+              Title is required
+            </p>
+            <p *ngIf="hasError('title', 'minlength')" class="text-red-400 text-sm flex items-center animate-fade-in">
+              <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+              </svg>
+              Title must be at least 5 characters
+            </p>
+          </div>
+        </div>
+
+        <!-- Excerpt -->
+        <div class="group">
+          <label for="excerpt" class="flex items-center text-sm font-semibold text-amber-400 mb-3">
+            <div class="w-8 h-8 bg-amber-500/20 rounded-lg flex items-center justify-center mr-3">
+              <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/>
+              </svg>
+            </div>
+            Article Excerpt *
+          </label>
+          <textarea 
+            id="excerpt" 
+            formControlName="excerpt" 
+            rows="4" 
+            placeholder="Write a compelling summary that will make readers want to continue..."
+            class="w-full px-6 py-4 bg-black/40 border-2 border-amber-500/20 rounded-2xl text-amber-100 placeholder-amber-300/40 focus:border-amber-400 focus:ring-4 focus:ring-amber-500/10 focus:outline-none transition-all duration-300 resize-none hover:border-amber-500/30 hover:shadow-lg hover:shadow-amber-500/10"
+          ></textarea>
+          <div class="mt-3 min-h-[24px]">
+            <p *ngIf="hasError('excerpt', 'required')" class="text-red-400 text-sm flex items-center animate-fade-in">
+              <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+              </svg>
+              Excerpt is required
+            </p>
+            <p *ngIf="hasError('excerpt', 'minlength')" class="text-red-400 text-sm flex items-center animate-fade-in">
+              <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+              </svg>
+              Excerpt must be at least 20 characters
+            </p>
+          </div>
+        </div>
+
+        <!-- Content Rich Text Editor -->
+        <div class="group">
+          <label class="flex items-center text-sm font-semibold text-amber-400 mb-3">
+            <div class="w-8 h-8 bg-amber-500/20 rounded-lg flex items-center justify-center mr-3">
+              <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+              </svg>
+            </div>
+            Article Content *
+          </label>
+          <div class="quill-container rounded-2xl overflow-hidden border-2 border-amber-500/20 hover:border-amber-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/10">
+            <quill-editor 
+              formControlName="content"
+              [modules]="quillConfig"
+              class="min-h-[400px]"
+            ></quill-editor>
+          </div>
+          <div class="mt-3 min-h-[24px]">
+            <p *ngIf="hasError('content', 'required')" class="text-red-400 text-sm flex items-center animate-fade-in">
+              <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+              </svg>
+              Content is required
+            </p>
+            <p *ngIf="hasError('content', 'minlength')" class="text-red-400 text-sm flex items-center animate-fade-in">
+              <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+              </svg>
+              Content must be at least 50 characters
+            </p>
+          </div>
+        </div>
+
+        <!-- Tags -->
+        <div class="group">
+          <label for="tags" class="flex items-center text-sm font-semibold text-amber-400 mb-3">
+            <div class="w-8 h-8 bg-amber-500/20 rounded-lg flex items-center justify-center mr-3">
+              <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+              </svg>
+            </div>
+            Tags
+            <span class="ml-2 text-xs text-amber-300/60 bg-amber-500/10 px-2 py-1 rounded-full">(Optional)</span>
+          </label>
+          <input 
+            id="tags" 
+            formControlName="tags" 
+            type="text" 
+            placeholder="javascript, angular, web-development, tutorial"
+            class="w-full px-6 py-4 bg-black/40 border-2 border-amber-500/20 rounded-2xl text-amber-100 placeholder-amber-300/40 focus:border-amber-400 focus:ring-4 focus:ring-amber-500/10 focus:outline-none transition-all duration-300 hover:border-amber-500/30 hover:shadow-lg hover:shadow-amber-500/10"
+          >
+          <p class="text-amber-400/60 mt-3 text-xs flex items-center">
+            <svg class="w-3 h-3 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Separate multiple tags with commas for better discoverability
+          </p>
+        </div>
+
+        <!-- Form Actions - Moved inside form -->
+        <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-amber-400/20 mt-8">
+          <button
+            type="button"
+            (click)="onCancel()"
+            class="flex items-center justify-center px-8 py-4 border-2 border-amber-500/50 text-amber-400 font-semibold rounded-2xl hover:bg-amber-500/10 hover:border-amber-400 hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-amber-500/20 group"
+          >
+            <svg class="w-5 h-5 mr-3 group-hover:-translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Cancel
+          </button>
+          <button
+            type="submit"
+            [disabled]="articleForm.invalid || isLoading"
+            class="flex-1 flex items-center justify-center px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-400 text-black font-bold rounded-2xl hover:from-amber-400 hover:to-amber-300 hover:scale-105 transition-all duration-300 shadow-xl shadow-amber-500/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none focus:outline-none focus:ring-4 focus:ring-amber-500/20 group disabled:hover:scale-100"
+          >
+            <ng-container *ngIf="!isLoading; else loadingState">
+              <svg class="w-5 h-5 mr-3 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              {{ isEditing ? 'Update Article' : 'Create Article' }}
+            </ng-container>
+            <ng-template #loadingState>
+              <div class="animate-spin rounded-full h-5 w-5 border-2 border-black border-t-transparent mr-3"></div>
+              {{ isEditing ? 'Updating...' : 'Creating...' }}
+            </ng-template>
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+  </div>
+</div>

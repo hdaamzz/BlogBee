@@ -16,12 +16,6 @@ export interface UserResponseDTO {
   createdAt: Date;
 }
 
-// export interface LoginResponseDTO {
-//   user: UserResponseDTO;
-//   token: string;
-
-// }
-
 export interface TokenPayloadDTO {
   userId: string;
   email: string;

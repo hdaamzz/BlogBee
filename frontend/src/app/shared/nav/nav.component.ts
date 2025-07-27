@@ -63,26 +63,19 @@ export class NavComponent implements OnInit, OnDestroy {
     this.closeMobileMenu();
   }
 
-  switchToDashboard() {
-    this._router.navigate(['dashboard']);
-    this.closeMobileMenu();
-  }
-
   switchToExplore() {
     this._router.navigate(['explore']);
     this.closeMobileMenu();
   }
 
   switchToMyBlogs() {
-    this._router.navigate(['my-articles']);
+    this._router.navigate(['articles']);
     this.closeMobileMenu();
   }
 
   onLogout() {
     this._authService.logout().subscribe({
-      next: (response) => {
-        console.log(response);
-        
+      next: (response) => {        
         if (response.success) {
           this._router.navigate(['/login']);
         }
