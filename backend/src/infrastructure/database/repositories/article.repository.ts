@@ -145,7 +145,7 @@ export class ArticleRepository extends BaseRepository<IArticleDocument, IArticle
 
   protected mapToEntity(articleDoc: IArticleDocument): IArticle {
     return {
-      id: articleDoc._id.toString(),
+      id: (articleDoc._id as unknown as any).toString(),
       title: articleDoc.title,
       excerpt: articleDoc.excerpt,
       content: articleDoc.content,

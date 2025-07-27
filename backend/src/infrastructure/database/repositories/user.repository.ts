@@ -50,7 +50,7 @@ export class UserRepository extends BaseRepository<IUserDocument, User> implemen
 
   protected mapToEntity(userDoc: IUserDocument): User {
     return new User(
-      userDoc._id.toString(),
+      (userDoc._id as any).toString(),
       userDoc.name,
       new Email(userDoc.email),
       userDoc.password,

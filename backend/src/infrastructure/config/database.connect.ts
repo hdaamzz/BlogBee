@@ -1,4 +1,5 @@
 import mongoose,{ConnectOptions} from "mongoose";
+import * as process from 'process';
 
 const MONGO_URI:string | undefined =process.env.MONGODB_URI;
 if (!MONGO_URI) {

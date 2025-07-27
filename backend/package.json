@@ -4,13 +4,15 @@
   "description": "Backend server for BlogBee application",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "npm install && tsc",
+    "prebuild": "npm install --save-dev @types/node",
     "start": "node dist/index.js",
     "dev": "nodemon src/main/index.ts"
   },
   "author": "hamzathul dilshad",
   "license": "ISC",
   "devDependencies": {
+    "@types/cookie-parser": "^1.4.9",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
