@@ -1,0 +1,40 @@
+ <div *ngIf="isVisible" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="bg-gradient-to-br from-black to-yellow-300/20 backdrop-blur-xl border border-yellow-300/30 rounded-2xl max-w-md w-full shadow-2xl shadow-red-500/20 animate-scale-in">
+        
+        <!-- Header -->
+        <div class="p-6 border-b border-yellow-300/30">
+          <div class="flex items-center space-x-4">
+            <div class="w-12 h-12 bg-red-500/20 rounded-xl flex items-center justify-center">
+              <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-xl font-bold text-red-300">{{ title }}</h3>
+              <p class="text-red-300/60 text-sm mt-1">This action is irreversible</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Content -->
+        <div class="p-6">
+          <p class="text-gray-300 leading-relaxed">{{ message }}</p>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex gap-3 p-6 pt-0">
+          <button
+            (click)="onCancel()"
+            class="flex-1 px-4 py-3 border-2 border-gray-600 text-gray-300 font-semibold rounded-xl hover:bg-gray-700/50 hover:border-gray-500 transition-all duration-200"
+          >
+            Cancel
+          </button>
+          <button
+            (click)="onConfirm()"
+            class="flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold rounded-xl hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-lg shadow-red-500/20"
+          >
+            Delete Article
+          </button>
+        </div>
+      </div>
+    </div>

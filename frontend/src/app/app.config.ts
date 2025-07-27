@@ -1,5 +1,5 @@
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { PreloadAllModules, provideRouter, withPreloading } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideToastr } from 'ngx-toastr';
 import { routes } from './app.routes';
@@ -15,12 +15,9 @@ export const appConfig: ApplicationConfig = {
       preventDuplicates: true,
     }),
   provideZoneChangeDetection({ eventCoalescing: true }), 
-  provideRouter(routes),
+  provideRouter(routes,withPreloading(PreloadAllModules)),
   provideHttpClient(
       withInterceptors([authInterceptor])
-    ),
-
-
-
+    )
   ]
 };
