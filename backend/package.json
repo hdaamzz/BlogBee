@@ -2,12 +2,13 @@
   "name": "cms-backend",
   "version": "1.0.0",
   "description": "Backend server for BlogBee application",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "build": "npm install && tsc",
-    "prebuild": "npm install --save-dev @types/node",
+    "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "nodemon src/main/index.ts"
+    "dev": "nodemon src/main/index.ts",
+    "clean": "rm -rf dist",
+    "prebuild": "npm run clean"
   },
   "author": "hamzathul dilshad",
   "license": "ISC",
@@ -44,5 +45,9 @@
     "reflect-metadata": "^0.2.2",
     "tsyringe": "^4.10.0",
     "uuid": "^11.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   }
 }
