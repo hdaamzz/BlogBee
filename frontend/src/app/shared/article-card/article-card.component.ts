@@ -58,8 +58,8 @@ export class ArticleCardComponent {
   }
 
   navigateToArticle(): void {
-    if (this.article.id) {
-      this.router.navigate(['/articles', this.article.id]);
+    if (this.article.slug) {
+      this.router.navigate(['/articles', this.article.slug]);
     }
   }
 }

@@ -2,11 +2,14 @@ import { injectable } from 'tsyringe';
 import { IArticleRepository } from '../../../domain/interfaces/repositories/article.repository.interface';
 import { IArticle, ICreateArticle, IUpdateArticle } from '../../../domain/entities/article.entity';
 import ArticleModel, { IArticleDocument } from '../models/article.model';
-import { log } from 'console';
+import { BaseRepository } from './base.repository';
 
 @injectable()
-export class ArticleRepository implements IArticleRepository {
-  
+export class ArticleRepository extends BaseRepository<IArticleDocument, IArticle> implements IArticleRepository {
+  constructor() {
+    super(ArticleModel);
+  }
+
   private generateSlug(title: string): string {
     return title
       .toLowerCase()
@@ -17,10 +20,17 @@ export class ArticleRepository implements IArticleRepository {
       + '-' + Date.now();
   }
 
+  private get authorPopulateOptions() {
+    return {
+      path: 'authorId',
+      select: 'name email'
+    };
+  }
+
   async create(article: ICreateArticle & { authorId: string }): Promise<IArticle> {
     const slug = this.generateSlug(article.title);
     
-    const articleDoc = new ArticleModel({
+    const articleDoc = await this.createDocument({
       title: article.title,
       excerpt: article.excerpt,
       content: article.content,
@@ -30,172 +40,110 @@ export class ArticleRepository implements IArticleRepository {
       viewCount: 0
     });
 
-    const savedArticle = await articleDoc.save();
-    
-    await savedArticle.populate({
-      path: 'authorId',
-      select: 'name email'
-    });
-
-    return this.mapToEntity(savedArticle);
+    await articleDoc.populate(this.authorPopulateOptions);
+    return this.mapToEntity(articleDoc);
   }
 
   async findById(id: string): Promise<IArticle | null> {
-    try {
-      const articleDoc = await ArticleModel.findById(id).populate({
-        path: 'authorId',
-        select: 'name email'
-      });
-      
-      return articleDoc ? this.mapToEntity(articleDoc) : null;
-    } catch (error) {
-      console.error('Error finding article by id:', error);
-      return null;
-    }
+    const articleDoc = await this.findOneById(id);
+    if (!articleDoc) return null;
+
+    await articleDoc.populate(this.authorPopulateOptions);
+    return this.mapToEntity(articleDoc);
   }
+
   async findByIdUserNotPopulated(id: string): Promise<IArticle | null> {
-    try {
-      const articleDoc = await ArticleModel.findById(id)
-      
-      return articleDoc ? this.mapToEntity(articleDoc) : null;
-    } catch (error) {
-      console.error('Error finding article by id:', error);
-      return null;
-    }
+    const articleDoc = await this.findOneById(id);
+    return articleDoc ? this.mapToEntity(articleDoc) : null;
   }
 
   async findBySlug(slug: string): Promise<IArticle | null> {
-    try {
-      const articleDoc = await ArticleModel.findOne({ slug }).populate({
-        path: 'authorId',
-        select: 'name email'
-      });
-      
-      return articleDoc ? this.mapToEntity(articleDoc) : null;
-    } catch (error) {
-      console.error('Error finding article by slug:', error);
-      return null;
-    }
+    const articleDoc = await this.findOneByFilter({ slug });
+    if (!articleDoc) return null;
+
+    await articleDoc.populate(this.authorPopulateOptions);
+    return this.mapToEntity(articleDoc);
   }
 
   async findByAuthorId(authorId: string): Promise<IArticle[]> {
-    try {
-      const articleDocs = await ArticleModel.find({ authorId })
-        .populate({
-          path: 'authorId',
-          select: 'name email'
-        })
-        .sort({ createdAt: -1 });
-      
-      return articleDocs.map(doc => this.mapToEntity(doc));
-    } catch (error) {
-      console.error('Error finding articles by author:', error);
-      return [];
-    }
+    const articleDocs = await this.findManyByFilter(
+      { authorId },
+      {
+        sort: { createdAt: -1 },
+        populate: this.authorPopulateOptions
+      }
+    );
+
+    return articleDocs.map(doc => this.mapToEntity(doc));
   }
 
   async findAll(page: number = 1, limit: number = 10): Promise<{ articles: IArticle[]; total: number }> {
-    try {
-      const skip = (page - 1) * limit;
-      
-      const [articleDocs, total] = await Promise.all([
-        ArticleModel.find()
-          .populate({
-            path: 'authorId',
-            select: 'name email'
-          })
-          .sort({ createdAt: -1 })
-          .skip(skip)
-          .limit(limit),
-        ArticleModel.countDocuments()
-      ]);
-      
-      
-      
-      const articles = articleDocs.map(doc => this.mapToEntity(doc));
-      return { articles, total };
-    } catch (error) {
-      console.error('Error finding all articles:', error);
-      return { articles: [], total: 0 };
-    }
+    const { documents, total } = await this.findWithPagination(
+      {},
+      page,
+      limit,
+      {
+        sort: { createdAt: -1 },
+        populate: this.authorPopulateOptions
+      }
+    );
+
+    const articles = documents.map(doc => this.mapToEntity(doc));
+    return { articles, total };
   }
 
   async update(id: string, article: Partial<IUpdateArticle>): Promise<IArticle | null> {
-    try {
-      const updateData: any = { ...article };
-      
-      if (article.title) {
-        updateData.slug = this.generateSlug(article.title);
-      }
-        const existingArticle = await ArticleModel.findById(id);
-        if (existingArticle) {
-          updateData.publishedAt = new Date();
-        }
-
-      const updatedArticle = await ArticleModel.findByIdAndUpdate(
-        id,
-        updateData,
-        { new: true, runValidators: true }
-      ).populate({
-        path: 'authorId',
-        select: 'name email'
-      });
-      
-      return updatedArticle ? this.mapToEntity(updatedArticle) : null;
-    } catch (error) {
-      console.error('Error updating article:', error);
-      return null;
+    const updateData: any = { ...article };
+    
+    if (article.title) {
+      updateData.slug = this.generateSlug(article.title);
     }
+
+    const existingArticle = await this.findOneById(id);
+    if (existingArticle) {
+      updateData.publishedAt = new Date();
+    }
+
+    const updatedArticle = await this.updateById(id, updateData);
+    if (!updatedArticle) return null;
+
+    await updatedArticle.populate(this.authorPopulateOptions);
+    return this.mapToEntity(updatedArticle);
   }
 
   async delete(id: string): Promise<boolean> {
-    try {
-      const result = await ArticleModel.findByIdAndDelete(id);
-      return !!result;
-    } catch (error) {
-      console.error('Error deleting article:', error);
-      return false;
-    }
+    return await this.deleteById(id);
   }
 
   async search(query: string, page: number = 1, limit: number = 10): Promise<{ articles: IArticle[]; total: number }> {
-    try {
-      const skip = (page - 1) * limit;
-      
-      const searchFilter = {
-        $and: [
-          {
-            $or: [
-              { $text: { $search: query } },
-              { title: { $regex: query, $options: 'i' } },
-              { excerpt: { $regex: query, $options: 'i' } },
-              { tags: { $in: [new RegExp(query, 'i')] } }
-            ]
-          }
-        ]
-      };
-      
-      const [articleDocs, total] = await Promise.all([
-        ArticleModel.find(searchFilter)
-          .populate({
-            path: 'authorId',
-            select: 'name email'
-          })
-          .sort({ createdAt: -1 })
-          .skip(skip)
-          .limit(limit),
-        ArticleModel.countDocuments(searchFilter)
-      ]);
-      
-      const articles = articleDocs.map(doc => this.mapToEntity(doc));
-      return { articles, total };
-    } catch (error) {
-      console.error('Error searching articles:', error);
-      return { articles: [], total: 0 };
-    }
+    const searchFilter = {
+      $and: [
+        {
+          $or: [
+            { $text: { $search: query } },
+            { title: { $regex: query, $options: 'i' } },
+            { excerpt: { $regex: query, $options: 'i' } },
+            { tags: { $in: [new RegExp(query, 'i')] } }
+          ]
+        }
+      ]
+    };
+
+    const { documents, total } = await this.findWithPagination(
+      searchFilter,
+      page,
+      limit,
+      {
+        sort: { createdAt: -1 },
+        populate: this.authorPopulateOptions
+      }
+    );
+
+    const articles = documents.map(doc => this.mapToEntity(doc));
+    return { articles, total };
   }
 
-  private mapToEntity(articleDoc: IArticleDocument): IArticle {
+  protected mapToEntity(articleDoc: IArticleDocument): IArticle {
     return {
       id: articleDoc._id.toString(),
       title: articleDoc.title,
@@ -203,7 +151,7 @@ export class ArticleRepository implements IArticleRepository {
       content: articleDoc.content,
       tags: articleDoc.tags,
       slug: articleDoc.slug,
-      authorId: articleDoc.authorId.toString(), 
+      authorId: articleDoc.authorId.toString(),
       author: articleDoc.authorId && typeof articleDoc.authorId === 'object' ? {
         id: (articleDoc.authorId as any)._id?.toString() || articleDoc.authorId.toString(),
         username: (articleDoc.authorId as any).name || '',

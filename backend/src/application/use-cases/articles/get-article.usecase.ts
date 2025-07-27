@@ -8,8 +8,8 @@ export class GetArticleUseCase {
     @inject("ArticleRepository") private articleRepository: IArticleRepository
   ) {}
 
-  async execute(articleId: string, incrementView: boolean = false): Promise<IArticle> {
-    const article = await this.articleRepository.findById(articleId);
+  async execute(slug: string): Promise<IArticle> {
+    const article = await this.articleRepository.findBySlug(slug);
     
     if (!article) {
       throw new Error('Article not found');

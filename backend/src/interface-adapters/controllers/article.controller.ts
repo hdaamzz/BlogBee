@@ -13,9 +13,10 @@ import { GetArticleUseCase } from '../../application/use-cases/articles/get-arti
 import { GetAllArticlesUseCase } from '../../application/use-cases/articles/get-all-articles.usecase';
 import { SearchArticlesUseCase } from '../../application/use-cases/articles/search-articles.usecase';
 import { CreateArticleDto, GetArticlesDto, SearchArticlesDto, UpdateArticleDto } from '../../application/dtos/article.dto';
+import { IArticleController } from '../../domain/controllers/IArticle.controller';
 
 @injectable()
-export class ArticleController {
+export class ArticleController implements IArticleController{
   constructor(
     @inject(CreateArticleUseCase) private createArticleUseCase: CreateArticleUseCase,
     @inject(GetUserArticlesUseCase) private getUserArticlesUseCase: GetUserArticlesUseCase,
@@ -145,10 +146,9 @@ export class ArticleController {
 
   async getArticle(req: Request, res: Response): Promise<void> {
     try {
-      const { id } = req.params;
-      const incrementView = req.query.view === 'true';
+      const { slug } = req.params;
       
-      const article = await this.getArticleUseCase.execute(id, incrementView);
+      const article = await this.getArticleUseCase.execute(slug);
       
       ResponseUtil.success(
         res,

@@ -51,7 +51,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   onCreateArticle(): void {
-    this.router.navigate(['/articles/create']);
+    this.router.navigate(['/articles']);
   }
 
   onExplore(): void {

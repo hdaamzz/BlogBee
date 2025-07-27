@@ -13,7 +13,7 @@ router.get('/search', (req, res) => articleController.searchArticles(req, res));
 
 router.get('/user', authenticateToken, (req, res) => articleController.getUserArticles(req, res));
 
-router.get('/:id', optionalAuth, (req, res) => articleController.getArticle(req, res));
+router.get('/:slug', optionalAuth, (req, res) => articleController.getArticle(req, res));
 
 router.post('/', authenticateToken, validateRequest(createArticleSchema), (req, res) => articleController.createArticle(req, res));
 router.put('/:id', authenticateToken, validateRequest(updateArticleSchema), (req, res) => articleController.updateArticle(req, res));

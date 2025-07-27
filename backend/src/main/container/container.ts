@@ -9,9 +9,6 @@ import { RegisterUserUseCase } from '../../application/use-cases/auth/register-u
 import { LoginUserUseCase } from '../../application/use-cases/auth/login-user.usecase';
 
 
-// Services
-import { AuthService } from '../../application/services/auth/auth.service';
-
 // Controllers
 import { AuthController } from '../../interface-adapters/controllers/auth.controller';
 import { LogoutUserUseCase } from '../../application/use-cases/auth/logout-user.usecase';
@@ -45,9 +42,6 @@ container.registerSingleton(DeleteArticleUseCase);
 container.registerSingleton(GetArticleUseCase);
 container.registerSingleton(GetAllArticlesUseCase);
 container.registerSingleton(SearchArticlesUseCase);
-
-//Services
-container.register("AuthService", { useClass: AuthService });
 
 
 //controller

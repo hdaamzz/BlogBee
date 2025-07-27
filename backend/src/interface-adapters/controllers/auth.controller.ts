@@ -3,19 +3,23 @@ import { injectable, inject } from 'tsyringe';
 import { ResponseUtil } from '../../shared/utils/response.util';
 import { LoginUserDTO, RegisterUserDTO } from '../../application/dtos/auth.dto';
 import { IAuthController } from '../../domain/controllers/IAuth.controller';
-import { IAuthService } from '../../domain/services/IAuth.service';
 import { JWTUtil } from '../../shared/utils/jwt.util';
+import { RegisterUserUseCase } from '../../application/use-cases/auth/register-user.usecase';
+import { LoginUserUseCase } from '../../application/use-cases/auth/login-user.usecase';
+import { LogoutUserUseCase } from '../../application/use-cases/auth/logout-user.usecase';
 
 @injectable()
 export class AuthController implements IAuthController{
   constructor(
-    @inject("AuthService") private authService: IAuthService
+    @inject(RegisterUserUseCase) private registerUserUseCase: RegisterUserUseCase,
+    @inject(LoginUserUseCase) private loginUserUseCase: LoginUserUseCase,
+    @inject(LogoutUserUseCase) private logoutUserUseCase: LogoutUserUseCase
   ) {}
 
   async register(req: Request, res: Response): Promise<Response> {
     try {
       const userData: RegisterUserDTO = req.body;
-      const result = await this.authService.registerUser(userData);
+      const result = await this.registerUserUseCase.execute(userData);
       
       if (result.success) {
         return ResponseUtil.success(res, result.data, result.message, result.statusCode);
@@ -31,7 +35,7 @@ export class AuthController implements IAuthController{
 async login(req: Request, res: Response): Promise<Response> {
     try {
       const loginData: LoginUserDTO = req.body;      
-      const result = await this.authService.loginUser(loginData);
+      const result = await this.loginUserUseCase.execute(loginData);
       
       if (result.success && result.data) {
         JWTUtil.setTokenCookie(res, result.data.token);
@@ -53,7 +57,7 @@ async login(req: Request, res: Response): Promise<Response> {
 
   async logout(req: Request, res: Response): Promise<Response> {
     try {
-      const result = await this.authService.logoutUser();
+      const result = await this.logoutUserUseCase.execute();
       
       JWTUtil.clearTokenCookie(res);
       

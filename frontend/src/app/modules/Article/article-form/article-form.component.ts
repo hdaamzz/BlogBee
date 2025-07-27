@@ -48,17 +48,17 @@ export class ArticleFormComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     this.isEditing = !!this.article;
     
-    if (this.article?.id) {
-      await this.setCompleteForm(this.article.id);
+    if (this.article?.slug) {
+      await this.setCompleteForm(this.article.slug);
     }
     
     this.initializeForm();
   }
 
-  async setCompleteForm(id: string): Promise<void> {
+  async setCompleteForm(slug: string): Promise<void> {
     try {
       this.isLoadingArticle = true;
-      const response = await this.articleService.getArticleById(id).toPromise();
+      const response = await this.articleService.getArticleById(slug).toPromise();
       
       if (response?.success) {
         this.article = response.data;
