@@ -29,6 +29,7 @@ frontend/.angular/cache
 frontend/connect.lock
 frontend/coverage
 frontend/libpeerconnection.log
+frontend/package-lock.json
 testem.log
 
 backend/node_modules

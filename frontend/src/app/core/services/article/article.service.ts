@@ -4,7 +4,7 @@ import { Observable, BehaviorSubject, of } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 
 import { AllarticlesResponse, ArticleResponse, ArticlesResponse, DeleteResponse, ErrorResponse, IArticle, ICreateArticle, IUpdateArticle } from '../../interfaces/article.interface';
-import { env } from '../../../environments/environment';
+import { environment } from '../../../environments/environment';
 
 
 @Injectable({
@@ -12,7 +12,7 @@ import { env } from '../../../environments/environment';
 })
 export class ArticleService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = `${env.apiUrl}/articles`;
+  private readonly baseUrl = `${environment.apiUrl}/articles`;
 
   private articlesSubject = new BehaviorSubject<IArticle[]>([]);
   public articles$ = this.articlesSubject.asObservable();

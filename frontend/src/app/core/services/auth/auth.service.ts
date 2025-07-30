@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { env } from '../../../environments/environment';
+import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { catchError, Observable, of, BehaviorSubject, tap } from 'rxjs';
 import { RegisterResponse, ErrorResponse, ILogin, IRegister, User, LoginResponse } from '../../interfaces/auth.interface';
@@ -8,7 +8,7 @@ import { RegisterResponse, ErrorResponse, ILogin, IRegister, User, LoginResponse
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = `${env.apiUrl}/auth`;
+  private apiUrl = `${environment.apiUrl}/auth`;
 
   private currentUserSubject = new BehaviorSubject<User | null>(this.getStoredUser());
   public currentUser$ = this.currentUserSubject.asObservable();
