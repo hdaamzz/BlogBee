@@ -33,7 +33,6 @@ Before running this project, make sure you have:
 
 ### 1. Clone the repository
 
-git clone https://github.com/yourusername/cms-frontend.git
 cd cms-frontend
 
 
