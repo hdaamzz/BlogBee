@@ -1,8 +1,9 @@
 import { injectable, inject } from 'tsyringe';
 import { IArticleRepository } from '../../../domain/interfaces/repositories/article.repository.interface';
+import { IDeleteArticleUseCase } from '../../../domain/user-cases/articles/IDelete-article.usecase';
 
 @injectable()
-export class DeleteArticleUseCase {
+export class DeleteArticleUseCase implements IDeleteArticleUseCase{
   constructor(
     @inject("ArticleRepository") private articleRepository: IArticleRepository
   ) {}

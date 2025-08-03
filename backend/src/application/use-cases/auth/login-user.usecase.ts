@@ -5,11 +5,11 @@ import { PasswordUtil } from '../../../shared/utils/password.util';
 import { StatusCode } from '../../../shared/constants/status-codes.enum';
 import { ResponseMessage } from '../../../shared/constants/messages.enum';
 import { JWTPayload, JWTUtil } from '../../../shared/utils/jwt.util';
-import { LoginUserResult } from '../../../domain/user-cases/auth/ILogin-user.usecase';
+import { ILoginUserUseCase, LoginUserResult } from '../../../domain/user-cases/auth/ILogin-user.usecase';
 
 
 @injectable()
-export class LoginUserUseCase {
+export class LoginUserUseCase implements ILoginUserUseCase{
   constructor(
     @inject('UserRepository') private userRepository: IUserRepository
   ) {}

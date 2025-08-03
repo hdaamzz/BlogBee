@@ -2,24 +2,24 @@ import { Request, Response } from 'express';
 import { injectable, inject } from 'tsyringe';
 import { ResponseUtil } from '../../shared/utils/response.util';
 import { LoginUserDTO, RegisterUserDTO } from '../../application/dtos/auth.dto';
-import { IAuthController } from '../../domain/controllers/IAuth.controller';
+import { IAuthController } from './interface/IAuth.controller';
 import { JWTUtil } from '../../shared/utils/jwt.util';
-import { RegisterUserUseCase } from '../../application/use-cases/auth/register-user.usecase';
-import { LoginUserUseCase } from '../../application/use-cases/auth/login-user.usecase';
-import { LogoutUserUseCase } from '../../application/use-cases/auth/logout-user.usecase';
+import { IRegisterUserUseCase } from '../../domain/user-cases/auth/IRegister-user.usecase';
+import { ILoginUserUseCase } from '../../domain/user-cases/auth/ILogin-user.usecase';
+import { ILogoutUserUseCase } from '../../domain/user-cases/auth/ILogout-user.usecase';
 
 @injectable()
 export class AuthController implements IAuthController{
   constructor(
-    @inject(RegisterUserUseCase) private registerUserUseCase: RegisterUserUseCase,
-    @inject(LoginUserUseCase) private loginUserUseCase: LoginUserUseCase,
-    @inject(LogoutUserUseCase) private logoutUserUseCase: LogoutUserUseCase
+    @inject("RegisterUserUseCase") private _registerUserUseCase: IRegisterUserUseCase,
+    @inject("LoginUserUseCase") private _loginUserUseCase: ILoginUserUseCase,
+    @inject("LogoutUserUseCase") private _logoutUserUseCase: ILogoutUserUseCase
   ) {}
 
   async register(req: Request, res: Response): Promise<Response> {
     try {
       const userData: RegisterUserDTO = req.body;
-      const result = await this.registerUserUseCase.execute(userData);
+      const result = await this._registerUserUseCase.execute(userData);
       
       if (result.success) {
         return ResponseUtil.success(res, result.data, result.message, result.statusCode);
@@ -32,10 +32,10 @@ export class AuthController implements IAuthController{
     }
   }
 
-async login(req: Request, res: Response): Promise<Response> {
+  async login(req: Request, res: Response): Promise<Response> {
     try {
       const loginData: LoginUserDTO = req.body;      
-      const result = await this.loginUserUseCase.execute(loginData);
+      const result = await this._loginUserUseCase.execute(loginData);
       
       if (result.success && result.data) {
         JWTUtil.setTokenCookie(res, result.data.token);
@@ -57,7 +57,7 @@ async login(req: Request, res: Response): Promise<Response> {
 
   async logout(req: Request, res: Response): Promise<Response> {
     try {
-      const result = await this.logoutUserUseCase.execute();
+      const result = await this._logoutUserUseCase.execute();
       
       JWTUtil.clearTokenCookie(res);
       

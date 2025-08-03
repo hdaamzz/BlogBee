@@ -1,4 +1,4 @@
-import { UserResponseDTO } from "../../../application/dtos/auth.dto";
+import { LoginUserDTO, UserResponseDTO } from "../../../application/dtos/auth.dto";
 import { StatusCode } from "../../../shared/constants/status-codes.enum";
 
 export interface LoginUserResult {
@@ -9,4 +9,7 @@ export interface LoginUserResult {
     user: UserResponseDTO;
     token: string;
   };
+}
+export interface ILoginUserUseCase {
+  execute(loginData: LoginUserDTO): Promise<LoginUserResult>;
 }

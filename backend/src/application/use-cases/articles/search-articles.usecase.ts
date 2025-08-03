@@ -2,9 +2,10 @@ import { injectable, inject } from 'tsyringe';
 import { IArticleRepository } from '../../../domain/interfaces/repositories/article.repository.interface';
 import { ArticleMapper } from '../../mappers/article.mapper';
 import { ArticleListResponseDto, SearchArticlesDto } from '../../dtos/article.dto';
+import { ISearchArticlesUseCase } from '../../../domain/user-cases/articles/ISearch-articles.usecase';
 
 @injectable()
-export class SearchArticlesUseCase {
+export class SearchArticlesUseCase implements ISearchArticlesUseCase{
   constructor(
     @inject("ArticleRepository") private articleRepository: IArticleRepository
   ) {}

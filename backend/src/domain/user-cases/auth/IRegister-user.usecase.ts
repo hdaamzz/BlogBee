@@ -1,4 +1,4 @@
-import { UserResponseDTO } from "../../../application/dtos/auth.dto";
+import { RegisterUserDTO, UserResponseDTO } from "../../../application/dtos/auth.dto";
 import { StatusCode } from "../../../shared/constants/status-codes.enum";
 
 export interface RegisterUserResult {
@@ -8,3 +8,6 @@ export interface RegisterUserResult {
   data?: UserResponseDTO;
 }
 
+export interface IRegisterUserUseCase {
+  execute(userData: RegisterUserDTO): Promise<RegisterUserResult>;
+}

@@ -5,11 +5,11 @@ import { RegisterUserDTO } from '../../dtos/auth.dto';
 import { PasswordUtil } from '../../../shared/utils/password.util';
 import { StatusCode } from '../../../shared/constants/status-codes.enum';
 import { ResponseMessage } from '../../../shared/constants/messages.enum';
-import { RegisterUserResult } from '../../../domain/user-cases/auth/IRegister-user.usecase';
+import { IRegisterUserUseCase, RegisterUserResult } from '../../../domain/user-cases/auth/IRegister-user.usecase';
 
 
 @injectable()
-export class RegisterUserUseCase {
+export class RegisterUserUseCase implements IRegisterUserUseCase {
   constructor(
     @inject('UserRepository') private userRepository: IUserRepository
   ) {}

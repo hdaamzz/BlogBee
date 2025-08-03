@@ -1,12 +1,12 @@
 import { injectable } from "tsyringe";
-import { LogoutUserResult } from "../../../domain/user-cases/auth/ILogout-user.usecase";
+import { ILogoutUserUseCase, LogoutUserResult } from "../../../domain/user-cases/auth/ILogout-user.usecase";
 import { StatusCode } from "../../../shared/constants/status-codes.enum";
 import { ResponseMessage } from "../../../shared/constants/messages.enum";
 
 
 
 @injectable()
-export class LogoutUserUseCase {
+export class LogoutUserUseCase  implements ILogoutUserUseCase {
   async execute(): Promise<LogoutUserResult> {
 
     return {

@@ -29,19 +29,19 @@ container.register("ArticleRepository", { useClass: ArticleRepository });
 
 
 // Register Auth use cases
-container.registerSingleton(RegisterUserUseCase);
-container.registerSingleton(LoginUserUseCase);
-container.registerSingleton(LogoutUserUseCase);
+container.register("RegisterUserUseCase", { useClass: RegisterUserUseCase });
+container.register("LoginUserUseCase", { useClass: LoginUserUseCase });
+container.register("LogoutUserUseCase", { useClass: LogoutUserUseCase });
 
 
 // Register Article use cases
-container.registerSingleton(CreateArticleUseCase);
-container.registerSingleton(GetUserArticlesUseCase);
-container.registerSingleton(UpdateArticleUseCase);
-container.registerSingleton(DeleteArticleUseCase);
-container.registerSingleton(GetArticleUseCase);
-container.registerSingleton(GetAllArticlesUseCase);
-container.registerSingleton(SearchArticlesUseCase);
+container.register("CreateArticleUseCase", { useClass: CreateArticleUseCase });
+container.register("GetUserArticlesUseCase", { useClass: GetUserArticlesUseCase });
+container.register("UpdateArticleUseCase", { useClass: UpdateArticleUseCase });
+container.register("DeleteArticleUseCase", { useClass: DeleteArticleUseCase });
+container.register("GetArticleUseCase", { useClass: GetArticleUseCase });
+container.register("GetAllArticlesUseCase", { useClass: GetAllArticlesUseCase });
+container.register("SearchArticlesUseCase", { useClass: SearchArticlesUseCase });
 
 
 //controller

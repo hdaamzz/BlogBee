@@ -3,9 +3,10 @@ import { IArticleRepository } from '../../../domain/interfaces/repositories/arti
 
 import { ArticleMapper } from '../../mappers/article.mapper';
 import { ArticleResponseDto, UpdateArticleDto } from '../../dtos/article.dto';
+import { IUpdateArticleUseCase } from '../../../domain/user-cases/articles/IUpdate-article.usecase';
 
 @injectable()
-export class UpdateArticleUseCase {
+export class UpdateArticleUseCase implements IUpdateArticleUseCase{
   constructor(
     @inject("ArticleRepository") private articleRepository: IArticleRepository
   ) {}

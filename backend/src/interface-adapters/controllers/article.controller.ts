@@ -4,27 +4,26 @@ import { ResponseUtil } from '../../shared/utils/response.util';
 import { StatusCode } from '../../shared/constants/status-codes.enum';
 import { ResponseMessage } from '../../shared/constants/messages.enum';
 
-
-import { CreateArticleUseCase } from '../../application/use-cases/articles/create-article.usecase';
-import { GetUserArticlesUseCase } from '../../application/use-cases/articles/get-user-articles.usecase';
-import { UpdateArticleUseCase } from '../../application/use-cases/articles/update-article.usecase';
-import { DeleteArticleUseCase } from '../../application/use-cases/articles/delete-article.usecase';
-import { GetArticleUseCase } from '../../application/use-cases/articles/get-article.usecase';
-import { GetAllArticlesUseCase } from '../../application/use-cases/articles/get-all-articles.usecase';
-import { SearchArticlesUseCase } from '../../application/use-cases/articles/search-articles.usecase';
 import { CreateArticleDto, GetArticlesDto, SearchArticlesDto, UpdateArticleDto } from '../../application/dtos/article.dto';
-import { IArticleController } from '../../domain/controllers/IArticle.controller';
+import { IArticleController } from './interface/IArticle.controller';
+import { ICreateArticleUseCase } from '../../domain/user-cases/articles/ICreate-article.usecase';
+import { IGetUserArticlesUseCase } from '../../domain/user-cases/articles/IGet-user-articles.usecase';
+import { IUpdateArticleUseCase } from '../../domain/user-cases/articles/IUpdate-article.usecase';
+import { IDeleteArticleUseCase } from '../../domain/user-cases/articles/IDelete-article.usecase';
+import { ISearchArticlesUseCase } from '../../domain/user-cases/articles/ISearch-articles.usecase';
+import { IGetAllArticlesUseCase } from '../../domain/user-cases/articles/IGet-all-articles.usecase';
+import { IGetArticleUseCase } from '../../domain/user-cases/articles/IGet-article.usecase';
 
 @injectable()
 export class ArticleController implements IArticleController{
   constructor(
-    @inject(CreateArticleUseCase) private createArticleUseCase: CreateArticleUseCase,
-    @inject(GetUserArticlesUseCase) private getUserArticlesUseCase: GetUserArticlesUseCase,
-    @inject(UpdateArticleUseCase) private updateArticleUseCase: UpdateArticleUseCase,
-    @inject(DeleteArticleUseCase) private deleteArticleUseCase: DeleteArticleUseCase,
-    @inject(GetArticleUseCase) private getArticleUseCase: GetArticleUseCase,
-    @inject(GetAllArticlesUseCase) private getAllArticlesUseCase: GetAllArticlesUseCase,
-    @inject(SearchArticlesUseCase) private searchArticlesUseCase: SearchArticlesUseCase
+    @inject("CreateArticleUseCase") private _createArticleUseCase: ICreateArticleUseCase,
+    @inject("GetUserArticlesUseCase") private _getUserArticlesUseCase: IGetUserArticlesUseCase,
+    @inject("UpdateArticleUseCase") private _updateArticleUseCase: IUpdateArticleUseCase,
+    @inject("DeleteArticleUseCase") private _deleteArticleUseCase: IDeleteArticleUseCase,
+    @inject("GetArticleUseCase") private _getArticleUseCase: IGetArticleUseCase,
+    @inject("GetAllArticlesUseCase") private _getAllArticlesUseCase: IGetAllArticlesUseCase,
+    @inject("SearchArticlesUseCase") private _searchArticlesUseCase: ISearchArticlesUseCase
   ) {}
 
   async createArticle(req: Request, res: Response): Promise<void> {
@@ -42,7 +41,7 @@ export class ArticleController implements IArticleController{
         tags: req.body.tags
       };
 
-      const result = await this.createArticleUseCase.execute(dto, userId);
+      const result = await this._createArticleUseCase.execute(dto, userId);
       
       ResponseUtil.success(
         res,
@@ -68,7 +67,7 @@ export class ArticleController implements IArticleController{
         return;
       }
 
-      const result = await this.getUserArticlesUseCase.execute(userId);
+      const result = await this._getUserArticlesUseCase.execute(userId);
       
       ResponseUtil.success(
         res,
@@ -101,7 +100,7 @@ export class ArticleController implements IArticleController{
         tags: req.body.tags
       };
 
-      const result = await this.updateArticleUseCase.execute(id, dto, userId);
+      const result = await this._updateArticleUseCase.execute(id, dto, userId);
       
       ResponseUtil.success(
         res,
@@ -127,7 +126,7 @@ export class ArticleController implements IArticleController{
       }
 
       const { id } = req.params;
-      await this.deleteArticleUseCase.execute(id, userId);
+      await this._deleteArticleUseCase.execute(id, userId);
       
       ResponseUtil.success(
         res,
@@ -148,7 +147,7 @@ export class ArticleController implements IArticleController{
     try {
       const { slug } = req.params;
       
-      const article = await this.getArticleUseCase.execute(slug);
+      const article = await this._getArticleUseCase.execute(slug);
       
       ResponseUtil.success(
         res,
@@ -170,7 +169,7 @@ export class ArticleController implements IArticleController{
         limit: parseInt(req.query.limit as string) || 10
       };
       
-      const result = await this.getAllArticlesUseCase.execute(dto);
+      const result = await this._getAllArticlesUseCase.execute(dto);
       
       ResponseUtil.success(
         res,
@@ -200,7 +199,7 @@ export class ArticleController implements IArticleController{
         return;
       }
 
-      const result = await this.searchArticlesUseCase.execute(dto);
+      const result = await this._searchArticlesUseCase.execute(dto);
       
       ResponseUtil.success(
         res,

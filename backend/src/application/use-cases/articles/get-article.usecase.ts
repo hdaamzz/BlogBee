@@ -1,9 +1,10 @@
 import { injectable, inject } from 'tsyringe';
 import { IArticleRepository } from '../../../domain/interfaces/repositories/article.repository.interface';
 import { IArticle } from '../../../domain/entities/article.entity';
+import { IGetArticleUseCase } from '../../../domain/user-cases/articles/IGet-article.usecase';
 
 @injectable()
-export class GetArticleUseCase {
+export class GetArticleUseCase implements IGetArticleUseCase{
   constructor(
     @inject("ArticleRepository") private articleRepository: IArticleRepository
   ) {}

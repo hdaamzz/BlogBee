@@ -5,3 +5,7 @@ export interface LogoutUserResult {
   statusCode: StatusCode;
   message: string;
 }
+
+export interface ILogoutUserUseCase {
+  execute(): Promise<LogoutUserResult>;
+}
